@@ -48,7 +48,51 @@ class BaseDataLayer : public Layer<Dtype> {
 template <typename Dtype>
 class Batch {
  public:
+
+  ~Batch() {
+    for (int i = 0; i < blobs_.size(); ++i) {
+      delete blobs_[i];
+    }
+  }
+
+  Blob<Dtype>* mutable_blob(int i) {
+    return const_cast<Blob<Dtype>*>(blob(i));
+  }
+
+  const Blob<Dtype>* blob(int i) const {
+    if (i == 0) {
+      return &data_;
+    } else if (i == 1) {
+      return &label_;
+    } else {
+      return blobs_[i - 2];
+    }
+  }
+
+  void Resize(int n) {
+    size_ = n;
+    if (n > 2) {
+      n -= 2;
+      if (blobs_.size() > 0) {
+        for (int i = 0; i < blobs_.size(); ++i) {
+          delete blobs_[i];
+        }
+      }
+      blobs_.resize(n);
+      for (int i = 0; i < n; ++i) {
+        blobs_[i] = new Blob<Dtype>();
+      }
+    }
+  }
+
+  int size() const {
+    return size_;
+  }
+
   Blob<Dtype> data_, label_;
+ protected:
+  std::vector<Blob<Dtype>*> blobs_;
+  int size_;
 };
 
 template <typename Dtype>
