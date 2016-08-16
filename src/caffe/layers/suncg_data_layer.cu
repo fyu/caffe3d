@@ -240,6 +240,8 @@ void SuncgDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype> *> &bottom,
 
 template<typename Dtype>
 void SuncgDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
+  const SuncgDataParameter& data_param =
+      this->layer_param_.suncg_data_param();
   Blob<Dtype> *tsdf = batch->mutable_blob(0);
   Blob<Dtype> *occ_label = batch->mutable_blob(1);
   Blob<Dtype> *occ_weight = batch->mutable_blob(2);
@@ -372,11 +374,16 @@ void SuncgDataLayer<Dtype>::load_batch(Batch<Dtype> *batch) {
                                    cudaMemcpyHostToDevice));
 
     // Fuse frame into voxel volume
-    int num_blocks = data_crop_vox_size[2];
-    int num_threads = data_crop_vox_size[1];
-    Integrate <<< num_blocks, num_threads >>> (cam_info_GPU, vox_info_GPU,
-        depth_data_GPU, tmp_tsdf_data_GPU, vox_weight_GPU, tmp_vox_height_GPU);
-    CUDA_CHECK(cudaGetLastError());
+    if(data_param.with_projection_tsdf()){
+      int num_blocks = data_crop_vox_size[2];
+      int num_threads = data_crop_vox_size[1];
+      GPU_set_zeros(num_crop_voxels, vox_weight_GPU);
+      Integrate <<< data_crop_vox_size[2], data_crop_vox_size[1] >>> (cam_info_GPU, vox_info_GPU, depth_data_GPU, tmp_tsdf_data_GPU, vox_weight_GPU, tmp_vox_height_GPU);
+      CUDA_CHECK(cudaGetLastError());
+    }else{
+      ComputeTSDF(cam_info, vox_info, cam_info_GPU, vox_info_GPU, depth_data_GPU, tmp_tsdf_data_GPU, tmp_vox_height_GPU);
+      CUDA_CHECK(cudaGetLastError());
+    }
 
     // Copy voxel volume back to CPU
     Dtype *vox_tsdf = new Dtype[num_crop_voxels];
