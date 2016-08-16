@@ -403,6 +403,8 @@ message LayerParameter {
   optional ThresholdParameter threshold_param = 128;
   optional TileParameter tile_param = 138;
   optional WindowDataParameter window_data_param = 129;
+
+  optional SuncgDataParameter suncg_data_param = 1000;
 }
 
 // Message that stores parameters used to apply transformation
@@ -796,6 +798,26 @@ message ImageDataParameter {
   // data.
   optional bool mirror = 6 [default = false];
   optional string root_folder = 12 [default = ""];
+}
+
+message SuncgDataParameter {
+  repeated string file_data = 1;
+  optional string file_list = 2;
+  optional float vox_unit = 3 [default = 0.02];
+  optional float vox_margin = 4 [default = 0.4];
+  repeated uint32 vox_size = 5;
+  repeated uint32 crop_size = 6;
+  repeated uint32 label_size = 7;
+  optional uint32 seg_classes = 8;
+  optional bool shuffle = 9 [default = true];
+  optional bool with_height = 10 [default = false];
+  optional bool occ_empty_only = 11 [default = false];
+  optional float neg_obj_sample_ratio = 12 [default = 0.0];
+  repeated uint32 seg_class_map = 13;
+  repeated float seg_class_weight = 14;
+  repeated float occ_class_weight = 15;
+  optional bool with_projection_tsdf = 16 [default = false];
+  optional uint32 batch_size = 17;
 }
 
 message InfogainLossParameter {

@@ -147,7 +147,7 @@ void GetFilesInDir(const std::vector<std::string> &directories, std::vector<std:
       perror ("Error: could not look into directory!");
     }
   }
-  std::cout<< "total number of files: "<<file_list.size()<<std::endl;
+  LOG(INFO) << "total number of files: "<<file_list.size();
   std::sort(file_list.begin(),  file_list.end());
   //std::cin.ignore();
 }

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
 
 #define CUDA_NUM_THREADS 512
 
@@ -38,7 +39,7 @@ __global__ void Kernel_set_value(size_t CUDA_NUM_LOOPS, size_t N, Dtype* GPUdst,
 template <typename Dtype>
 void ReadDepthImage(const std::string &filename, Dtype * depth_data,
                     int frame_width, int frame_height) {
-  cv::Mat depth_image = cv::imread(filename.c_str(), 0);
+  cv::Mat depth_image = cv::imread(filename.c_str(), CV_LOAD_IMAGE_ANYDEPTH);
   unsigned short * depth_raw = new unsigned short[frame_height * frame_width];
   for (int i = 0; i < frame_height * frame_width; ++i) {
     depth_raw[i] = ((((unsigned short)depth_image.data[i * 2 + 1]) << 8) +
